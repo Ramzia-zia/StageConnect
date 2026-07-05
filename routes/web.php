@@ -47,4 +47,16 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{offer}', [OfferController::class, 'update'])->name('update');
         Route::delete('/{offer}', [OfferController::class, 'destroy'])->name('destroy');
     });
+
+        // Administration
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/offers', [AdminDashboardController::class, 'moderateOffers'])->name('offers');
+        Route::post('/offers/{offer}/validate', [AdminDashboardController::class, 'validateOffer'])->name('validate');
+        Route::delete('/offers/{offer}', [AdminDashboardController::class, 'destroyOffer'])->name('destroyOffer');
+        Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
+    });
+
+    // Candidatures (Entreprise - voir les candidats d'une offre)
+    Route::middleware('role:company')->get('/offers/{offer}/applications', [ApplicationController::class, 'offerApplications'])->name('applications.offer');
+    Route::middleware('role:company')->put('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.updateStatus');
 });

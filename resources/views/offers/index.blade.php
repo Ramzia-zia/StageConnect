@@ -36,6 +36,7 @@
                             @endif
                         </td>
                         <td>
+                            <a href="{{ route('applications.offer', $offer) }}" class="btn btn-sm btn-info">Voir candidatures ({{ $offer->applications->count() }})</a>
                             <a href="{{ route('offers.edit', $offer) }}" class="btn btn-sm btn-primary">Modifier</a>
                             <form action="{{ route('offers.destroy', $offer) }}" method="POST" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr ?');">
                                 @csrf @method('DELETE')

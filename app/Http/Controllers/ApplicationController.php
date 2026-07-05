@@ -36,4 +36,25 @@ class ApplicationController extends Controller
 
         return view('applications.index', compact('applications'));
     }
+
+        public function offerApplications(Offer $offer)
+    {
+        $this->authorize('update', $offer);
+        $applications = $offer->applications()->with('student.profile')->latest()->paginate(10);
+        return view('applications.company', compact('offer', 'applications'));
+    }
+
+    public function updateStatus(Request $request, Application $application)
+    {
+        $offer = $application->offer;
+        $this->authorize('update', $offer);
+
+        $request->validate([
+            'status' => ['required', 'in:pending,interview,accepted,rejected'],
+        ]);
+
+        $application->update(['status' => $request->status]);
+
+        return back()->with('status', 'Statut de la candidature mis à jour.');
+    }
 }
