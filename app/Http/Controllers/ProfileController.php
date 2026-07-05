@@ -2,59 +2,80 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\UpdateProfileRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): View
+    public function edit()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user = Auth::user();
+        
+        if ($user->role === 'company') {
+            $user->load('company');
+        } else {
+            $user->load('profile');
         }
 
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return view('profiles.edit', compact('user'));
     }
 
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
+    public function update(UpdateProfileRequest $request)
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        $user = Auth::user();
+        $data = $request->validated();
+
+        // Mise à jour des infos utilisateur de base
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
         ]);
 
-        $user = $request->user();
+        if ($user->role === 'student') {
+            $profileData = [
+                'phone' => $data['phone'] ?? null,
+                'bio' => $data['bio'] ?? null,
+                'education_level' => $data['education_level'] ?? null,
+                'skills' => isset($data['skills']) ? explode(',', $data['skills'][0] ?? $data['skills']) : null,
+            ];
 
-        Auth::logout();
+            if ($request->hasFile('avatar')) {
+                if ($user->profile && $user->profile->avatar) {
+                    Storage::disk('public')->delete($user->profile->avatar);
+                }
+                $profileData['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            }
 
-        $user->delete();
+            if ($request->hasFile('cv')) {
+                if ($user->profile && $user->profile->cv_path) {
+                    Storage::disk('public')->delete($user->profile->cv_path);
+                }
+                $profileData['cv_path'] = $request->file('cv')->store('cvs', 'public');
+            }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+            $user->profile()->updateOrCreate(['user_id' => $user->id], $profileData);
+        } 
+        elseif ($user->role === 'company') {
+            $companyData = [
+                'name' => $data['company_name'],
+                'siret' => $data['siret'] ?? null,
+                'website' => $data['website'] ?? null,
+                'sector' => $data['sector'] ?? null,
+                'city' => $data['city'],
+            ];
 
-        return Redirect::to('/');
+            if ($request->hasFile('logo')) {
+                if ($user->company && $user->company->logo) {
+                    Storage::disk('public')->delete($user->company->logo);
+                }
+                $companyData['logo'] = $request->file('logo')->store('logos', 'public');
+            }
+
+            $user->company()->updateOrCreate(['user_id' => $user->id], $companyData);
+        }
+
+        return back()->with('status', 'Profil mis à jour avec succès.');
     }
 }

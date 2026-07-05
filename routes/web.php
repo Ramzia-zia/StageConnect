@@ -1,34 +1,38 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\StudentDashboardController;
-use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\CompanyDashboardController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentDashboardController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OfferController;
 
-// Page d'accueil publique
+
+Auth::routes();
+
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Toutes les routes où il FAUT être connecté
-Route::middleware('auth')->group(function () {
-    
-    // 1. Routes des profils (Breeze)
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // 2. L'ancien dashboard par défaut (on le garde au cas où)
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
-    // 3. NOS NOUVEAUX DASHBOARDS
+Route::middleware(['auth'])->group(function () {
+    // Dashboards
     Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
     Route::get('/company/dashboard', [CompanyDashboardController::class, 'index'])->name('company.dashboard');
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-});
+    // Profil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-require __DIR__.'/auth.php';
+        // Offres (Entreprise)
+    Route::middleware('role:company')->prefix('offers')->name('offers.')->group(function () {
+        Route::get('/', [OfferController::class, 'index'])->name('index');
+        Route::get('/create', [OfferController::class, 'create'])->name('create');
+        Route::post('/', [OfferController::class, 'store'])->name('store');
+        Route::get('/{offer}/edit', [OfferController::class, 'edit'])->name('edit');
+        Route::put('/{offer}', [OfferController::class, 'update'])->name('update');
+        Route::delete('/{offer}', [OfferController::class, 'destroy'])->name('destroy');
+});
