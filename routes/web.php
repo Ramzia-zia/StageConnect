@@ -9,6 +9,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicOfferController;
 use App\Http\Controllers\StudentDashboardController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;    
+use App\Http\Controllers\NotificationController;
+
 
 Auth::routes();
 
@@ -59,4 +62,9 @@ Route::middleware(['auth'])->group(function () {
     // Candidatures (Entreprise - voir les candidats d'une offre)
     Route::middleware('role:company')->get('/offers/{offer}/applications', [ApplicationController::class, 'offerApplications'])->name('applications.offer');
     Route::middleware('role:company')->put('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.updateStatus');
+
+        // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });

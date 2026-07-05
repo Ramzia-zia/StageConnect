@@ -33,6 +33,8 @@ class AdminDashboardController extends Controller
     public function validateOffer(Offer $offer)
     {
         $offer->update(['is_active' => true, 'published_at' => now()]);
+
+                $offer->company->user->notify(new \App\Notifications\OfferValidatedNotification($offer));
         return back()->with('status', 'Offre validée et publiée.');
     }
 

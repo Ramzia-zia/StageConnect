@@ -29,9 +29,26 @@
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav me-auto">
-
+                                    <!-- Icône Notifications -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell"></i>
+                        <span id="notification-count" class="badge bg-danger rounded-pill" style="display: none;">0</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="min-width: 300px;">
+                        <li><h6 class="dropdown-header">Notifications</h6></li>
+                        <li id="notification-list">
+                            <span class="dropdown-item text-muted text-center">Chargement...</span>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="{{ route('notifications.readAll') }}" method="POST" class="px-3">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-link text-primary p-0">Tout marquer comme lu</button>
+                            </form>
+                        </li>
                     </ul>
+                </li>
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
@@ -76,5 +93,49 @@
             @yield('content')
         </main>
     </div>
+
+    <!-- Ajouter Bootstrap Icons dans le head si ce n'est pas fait -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const countEl = document.getElementById('notification-count');
+    const listEl = document.getElementById('notification-list');
+
+    function loadNotifications() {
+        fetch('{{ route("notifications.index") }}')
+            .then(res => res.json())
+            .then(data => {
+                countEl.innerText = data.length;
+                countEl.style.display = data.length > 0 ? 'inline' : 'none';
+
+                if (data.length === 0) {
+                    listEl.innerHTML = '<span class="dropdown-item text-muted text-center">Aucune notification</span>';
+                } else {
+                    listEl.innerHTML = data.map(n => `
+                        <a class="dropdown-item ${n.read_at ? '' : 'bg-light fw-bold'}" href="${n.data.action_url}" onclick="markRead(${n.id})" style="white-space: normal; font-size: 0.9em;">
+                            ${n.data.message}
+                        </a>
+                    `).join('');
+                }
+            });
+    }
+
+    window.markRead = function(id) {
+        fetch('{{ route("notifications.read") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ id: id })
+        }).then(() => loadNotifications());
+    };
+
+    loadNotifications();
+    
+    // Rafraîchir les notifications toutes les 30 secondes
+    setInterval(loadNotifications, 30000);
+});
+</script>
+
+
 </body>
 </html>

@@ -23,6 +23,7 @@ class ApplicationController extends Controller
             'student_id' => $student->id,
             'cover_letter_custom' => $request->cover_letter_custom,
         ]);
+                $offer->company->user->notify(new \App\Notifications\NewApplicationNotification($offer, $student));
 
         return redirect()->route('applications.my')->with('status', 'Votre candidature a été envoyée avec succès.');
     }
@@ -54,6 +55,8 @@ class ApplicationController extends Controller
         ]);
 
         $application->update(['status' => $request->status]);
+
+                $application->student->notify(new \App\Notifications\ApplicationStatusNotification($application));
 
         return back()->with('status', 'Statut de la candidature mis à jour.');
     }
