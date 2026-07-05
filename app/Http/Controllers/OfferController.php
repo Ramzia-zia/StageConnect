@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class OfferController extends Controller
 {
-    public function index()
+        public function index()
     {
-        $offers = Auth::user()->company->offers()->latest()->paginate(10);
+        // On ajoute withCount('applications') pour avoir le nombre exact de candidatures
+        $offers = Auth::user()->company->offers()->withCount('applications')->latest()->paginate(10);
         return view('offers.index', compact('offers'));
     }
 

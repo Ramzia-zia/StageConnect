@@ -33,6 +33,13 @@
                 </div>
             </div>
 
+                        <div class="card shadow-sm bg-light">
+                @if(session('error'))
+                    <div class="alert alert-danger m-3">{{ session('error') }}</div>
+                @endif
+
+                <div class="card-body">
+
             <div class="card shadow-sm bg-light">
                 <div class="card-body">
                     <ul class="list-unstyled mb-0">

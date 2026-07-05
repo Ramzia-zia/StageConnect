@@ -4,21 +4,20 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\CompanyDashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicOfferController;
 use App\Http\Controllers\StudentDashboardController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;    
-use App\Http\Controllers\NotificationController;
-
+use App\Http\Controllers\SocialiteController;
 
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::get('/', function () {
-    return redirect()->route('offers.public.index');
+    return view('welcome');
 });
 
 // Espace Public
@@ -49,9 +48,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{offer}/edit', [OfferController::class, 'edit'])->name('edit');
         Route::put('/{offer}', [OfferController::class, 'update'])->name('update');
         Route::delete('/{offer}', [OfferController::class, 'destroy'])->name('destroy');
+        
+        // Voir les candidatures d'une offre spécifique
+        Route::get('/{offer}/applications', [ApplicationController::class, 'offerApplications'])->name('applications.offer');
     });
 
-        // Administration
+    // Changement de statut d'une candidature (Hors du préfixe 'offers')
+    Route::middleware('role:company')->put('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.updateStatus');
+
+    // Administration
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/offers', [AdminDashboardController::class, 'moderateOffers'])->name('offers');
         Route::post('/offers/{offer}/validate', [AdminDashboardController::class, 'validateOffer'])->name('validate');
@@ -59,12 +64,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
     });
 
-    // Candidatures (Entreprise - voir les candidats d'une offre)
-    Route::middleware('role:company')->get('/offers/{offer}/applications', [ApplicationController::class, 'offerApplications'])->name('applications.offer');
-    Route::middleware('role:company')->put('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.updateStatus');
-
-        // Notifications
+    // Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+
+    // Connexion Sociale
+Route::get('/auth/{provider}/redirect', [SocialiteController::class, 'redirectToProvider'])->name('social.login');
+Route::get('/auth/{provider}/callback', [SocialiteController::class, 'handleProviderCallback'])->name('social.callback');
+
 });

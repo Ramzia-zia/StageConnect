@@ -42,6 +42,30 @@
             <x-primary-button class="ms-3">
                 {{ __('Log in') }}
             </x-primary-button>
+
+                                    <div class="row mb-0">
+                            <div class="col-md-6 offset-md-4">
+                                <button type="submit" class="btn btn-primary">
+                                    {{ __('Login') }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- BOUTONS CONNEXION SOCIALE -->
+                        <hr class="my-4">
+                        <div class="text-center mb-3"><small>Ou se connecter avec</small></div>
+                        <div class="row mb-0">
+                            <div class="col-md-6 offset-md-4">
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('social.login', 'google') }}" class="btn btn-outline-danger btn-sm flex-grow-1">
+                                        <i class="bi bi-google me-1"></i> Google
+                                    </a>
+                                    <a href="{{ route('social.login', 'github') }}" class="btn btn-outline-dark btn-sm flex-grow-1">
+                                        <i class="bi bi-github me-1"></i> GitHub
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
         </div>
     </form>
 </x-guest-layout>

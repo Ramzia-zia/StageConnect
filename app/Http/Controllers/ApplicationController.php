@@ -10,20 +10,22 @@ use Illuminate\Support\Facades\Auth;
 
 class ApplicationController extends Controller
 {
-    public function apply(StoreApplicationRequest $request)
+           public function apply(StoreApplicationRequest $request)
     {
         $student = Auth::user();
-        
-        if (!$student->profile || !$student->profile->cv_path) {
-            return back()->withErrors(['error' => 'Vous devez uploader votre CV dans votre profil avant de postuler.']);
-        }
+        $offer = \App\Models\Offer::find($request->offer_id);
 
-        Application::create([
+        // Création de la candidature
+        $application = Application::create([
             'offer_id' => $request->offer_id,
             'student_id' => $student->id,
             'cover_letter_custom' => $request->cover_letter_custom,
         ]);
-                $offer->company->user->notify(new \App\Notifications\NewApplicationNotification($offer, $student));
+
+        // Envoyer la notification à l'entreprise
+        if ($offer && $offer->company) {
+            $offer->company->user->notify(new \App\Notifications\NewApplicationNotification($offer, $student));
+        }
 
         return redirect()->route('applications.my')->with('status', 'Votre candidature a été envoyée avec succès.');
     }

@@ -12,7 +12,7 @@
     @endif
 
     <div class="row">
-        @foreach($applications as $application)
+        @forelse($applications as $application)
             <div class="col-md-6 mb-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
@@ -64,7 +64,7 @@
             <div class="col-12">
                 <div class="alert alert-info">Aucune candidature pour cette offre.</div>
             </div>
-        @endforeach
+        @endforelse
     </div>
     <div class="d-flex justify-content-center mt-4">{{ $applications->links() }}</div>
 </div>

@@ -19,12 +19,12 @@ class NewApplicationNotification extends Notification
         return ['database'];
     }
 
-    public function toDatabase(object $notifiable): DatabaseMessage
+        public function toDatabase(object $notifiable): DatabaseMessage
     {
         return new DatabaseMessage([
             'message' => "{$this->student->name} a postulé à votre offre : {$this->offer->title}",
             'offer_id' => $this->offer->id,
-            'action_url' => route('applications.offer', $this->offer)
+            'action_url' => route('offers.applications.offer', $this->offer)
         ]);
     }
 }

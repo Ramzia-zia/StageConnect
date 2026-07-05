@@ -39,7 +39,7 @@ class RegisterController extends Controller
         ]);
     }
 
-    protected function registered(Request $request, $user)
+       protected function registered(\Illuminate\Http\Request $request, $user)
     {
         if ($user->role === 'company') {
             return redirect()->route('company.dashboard');
