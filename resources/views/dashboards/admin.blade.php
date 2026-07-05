@@ -1,0 +1,1 @@
+<h1 class="text-2xl font-bold text-red-600">Bienvenue sur le tableau de bord Administrateur</h1>

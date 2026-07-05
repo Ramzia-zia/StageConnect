@@ -1,0 +1,1 @@
+<h1 class="text-2xl font-bold text-green-600">Bienvenue sur le tableau de bord Entreprise</h1>
